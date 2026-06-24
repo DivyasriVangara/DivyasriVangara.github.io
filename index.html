@@ -1,22 +1,135 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AMS QR Scanner</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student Login</title>
+<link rel="manifest" href="manifest.json" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, #4f46e5, #818cf8);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px 28px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  }
+  h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    color: #1f2937;
+    text-align: center;
+  }
+  p.subtitle {
+    margin: 0 0 24px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+  input {
+    width: 100%;
+    padding: 11px 14px;
+    margin-bottom: 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+  input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #4f46e5;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover { background: #4338ca; }
+  button:disabled { background: #a5a6f3; cursor: not-allowed; }
+  #error-msg {
+    color: #dc2626;
+    font-size: 13px;
+    margin-top: 12px;
+    text-align: center;
+    min-height: 18px;
+  }
+</style>
 </head>
 <body>
 
-    <h1>Attendance Monitoring System</h1>
-    <h2 id="status">Waiting for QR...</h2>
-    <button id="start-btn">Scan QR</button>
+  <div class="card">
+    <h1>🎓 Student Login</h1>
+    <p class="subtitle">Sign in to mark your attendance</p>
 
-    <div id="reader"></div>
+    <form id="login-form">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="student@example.com" required />
 
-    <h3 id="result"></h3>
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="••••••••" required />
 
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="script.js"></script>
+      <button type="submit" id="login-btn">Log In</button>
+      <div id="error-msg"></div>
+    </form>
+  </div>
+
+  <script type="module">
+    import { auth, signInWithEmailAndPassword } from "./js/firebase-config.js";
+
+    const form = document.getElementById("login-form");
+    const errorMsg = document.getElementById("error-msg");
+    const loginBtn = document.getElementById("login-btn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorMsg.textContent = "";
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "student/dashboard.html";
+      } catch (err) {
+        errorMsg.textContent = "Login failed: " + err.message;
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Log In";
+      }
+    });
+
+    // Register service worker for PWA support
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(console.error);
+    }
+  </script>
 
 </body>
 </html>
-
