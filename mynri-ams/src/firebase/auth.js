@@ -13,6 +13,7 @@ import { auth, db } from "./firebaseConfig";
 
 /* ---------------- REGISTER ---------------- */
 export const registerUser = async (data) => {
+
   const userCred = await createUserWithEmailAndPassword(
     auth,
     data.email,
@@ -21,29 +22,83 @@ export const registerUser = async (data) => {
 
   const user = userCred.user;
 
-  await setDoc(doc(db, "students", user.uid), {
-    studentId: data.studentId,
+  const collectionName =
+    data.role === "faculty"
+      ? "faculty"
+      : "students";
+
+  await setDoc(doc(db, collectionName, user.uid), {
+
+    studentId:
+      data.role === "student"
+        ? data.studentId
+        : "",
+
+    facultyId:
+      data.role === "faculty"
+        ? data.facultyId
+        : "",
+
     name: data.name,
+
     email: data.email,
+
     department: data.department,
-    year: data.year,
+
+    year:
+      data.role === "student"
+        ? data.year
+        : "",
+
+    role: data.role,
+
     uid: user.uid
+
   });
 
   return user;
-};
 
+};
 /* ---------------- LOGIN ---------------- */
-export const loginUser = async (email, password) => {
+
+export const loginUser = async (id, password, role) => {
+
+  const collectionName =
+    role === "faculty"
+      ? "faculty"
+      : "students";
+
+  const fieldName =
+    role === "faculty"
+      ? "facultyId"
+      : "studentId";
+
+  const q = query(
+    collection(db, collectionName),
+    where(fieldName, "==", id)
+  );
+
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    throw new Error("ID not found");
+  }
+
+  const profile = snapshot.docs[0].data();
+
   const userCred = await signInWithEmailAndPassword(
     auth,
-    email,
+    profile.email,
     password
   );
 
-  return userCred.user;
-};
+  return {
+    success: true,
+    user: userCred.user,
+    profile
+  };
 
+};
 /* ---------------- GET PROFILE ---------------- */
 export const getUser = async (uid) => {
   const snap = await getDoc(doc(db, "students", uid));

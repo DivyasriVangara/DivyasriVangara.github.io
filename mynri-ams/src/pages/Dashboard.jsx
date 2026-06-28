@@ -1,61 +1,100 @@
 import { useEffect, useState } from "react";
-import { auth } from "../firebase/firebaseConfig";
-import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import "../styles/dashboard.css";
 import { getStudentProfile } from "../firebase/auth";
 
 function Dashboard() {
-    const navigate = useNavigate();
+
   const [student, setStudent] = useState(null);
 
   useEffect(() => {
-    const fetchStudent = async () => {
-      if (auth.currentUser) {
-        const data = await getStudentProfile(auth.currentUser.uid);
-        setStudent(data);
-      }
+
+    const loadProfile = async () => {
+
+      const uid = localStorage.getItem("uid");
+
+      if (!uid) return;
+
+      const data = await getStudentProfile(uid);
+
+      setStudent(data);
+
     };
 
-    fetchStudent();
+    loadProfile();
+
   }, []);
 
-  if (!student) {
-    return <h2>Loading...</h2>;
-  }
-
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Student Dashboard</h1>
 
-      <hr />
+    <div className="dashboard-container">
 
-      <h3>Welcome, {student.name}</h3>
+      <Sidebar />
 
-      <p><strong>Student ID:</strong> {student.studentId}</p>
+      <div className="dashboard-content">
 
-      <p><strong>Email:</strong> {student.email}</p>
+        <h1>
+          Welcome {student?.name || "Student"} 👋
+        </h1>
 
-      <p><strong>Department:</strong> {student.department}</p>
+        <p>
+          Attendance Management System
+        </p>
 
-      <p><strong>Year:</strong> {student.year}</p>
+        <div className="card">
 
-      <br />
+          <h3>Student Profile</h3>
 
-      <button onClick={() => navigate("/scan")}>
-  Mark Attendance
-</button>
+          <p><b>Student ID :</b> {student?.studentId}</p>
 
-      <button style={{ marginLeft: "10px" }}>
-        Attendance History
-      </button>
+          <p><b>Department :</b> {student?.department}</p>
 
-      <button style={{ marginLeft: "10px" }}>
-        Profile
-      </button>
+          <p><b>Year :</b> {student?.year}</p>
 
-      <button style={{ marginLeft: "10px" }}>
-        Logout
-      </button>
+          <p><b>Email :</b> {student?.email}</p>
+
+        </div>
+
+        <br />
+
+        <div className="cards">
+
+          <div className="card">
+            <h3>Attendance</h3>
+            <h2>0%</h2>
+          </div>
+
+          <div className="card">
+            <h3>Present</h3>
+            <h2>0</h2>
+          </div>
+
+          <div className="card">
+            <h3>Absent</h3>
+            <h2>0</h2>
+          </div>
+
+          <div className="card">
+            <h3>Late</h3>
+            <h2>0</h2>
+          </div>
+
+        </div>
+
+        <div className="quick-actions">
+
+          <button>📷 Scan QR</button>
+
+          <button>📝 Leave Request</button>
+
+          <button>👤 Profile</button>
+
+        </div>
+
+      </div>
+
     </div>
+
   );
 }
 

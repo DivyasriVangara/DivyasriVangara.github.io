@@ -1,79 +1,106 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { loginUser } from "../firebase/auth";
+import { loginUser } from "../firebase/auth"; // your auth.js
 
 function Login() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+ const [form, setForm] = useState({
+  id: "",
+  password: "",
+  role: "student",
+});
+
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const handleLogin = async (e) => {
-  e.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  try {
-    const user = await loginUser(form.email, form.password);
+    try {
+      const res = await loginUser(
+  form.email,
+  form.password,
+  form.role
+);
 
-    console.log(user);
+      if (!res.success) {
+        setError(res.message);
+        return;
+      }
 
-    alert("Login Successful");
+      const user = res.user;
 
-    navigate("/dashboard");
+      // store role in localStorage
+      localStorage.setItem("role", form.role);
+      localStorage.setItem("uid", user.uid);
 
-  } catch (error) {
-    alert(error.message);
-  }
-};
+      // redirect based on role
+      if (form.role === "student") {
+        navigate("/dashboard");
+      } else {
+        navigate("/faculty-dashboard"); // if you create later
+      }
+
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Student Login</h1>
+    <div className="container">
+      <div className="card">
 
-      <form onSubmit={handleLogin}>
+        <h2>Login</h2>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
+        <form onSubmit={handleLogin}>
 
-        <br /><br />
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+          >
+            <option value="student">Student</option>
+            <option value="faculty">Faculty</option>
+          </select>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
+          <input
+            type="text"
+            name="id"
+            placeholder={
+              form.role === "student"
+                ? "Student ID"
+                : "Faculty ID"
+            }
+            value={form.id}
+            onChange={handleChange}
+            required
+          />
 
-        <br /><br />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            onChange={handleChange}
+            required
+          />
 
-        <button type="submit">
-          Login
-        </button>
+          {error && <p style={{ color: "red" }}>{error}</p>}
 
-      </form>
+          <button type="submit">
+            Login
+          </button>
 
-      <br />
+        </form>
 
-      <p>
-        Don't have an account?{" "}
-        <Link to="/register">Register</Link>
-      </p>
+        <p>
+          Don't have an account? <Link to="/register">Register</Link>
+        </p>
+
+      </div>
     </div>
   );
 }

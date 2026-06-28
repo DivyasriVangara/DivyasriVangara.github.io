@@ -7,14 +7,16 @@ import "../styles/student.css";
 function Register() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    studentId: "",
-    name: "",
-    email: "",
-    password: "",
-    department: "",
-    year: ""
-  });
+const [form, setForm] = useState({
+  studentId: "",
+  facultyId: "",
+  name: "",
+  email: "",
+  password: "",
+  department: "",
+  year: "",
+  role: "student"
+});
 
   const handleChange = (e) => {
     setForm({
@@ -25,6 +27,19 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.role === "student") {
+  const id = form.studentId.trim().toUpperCase();
+
+  if (!/^2[0-9A-Z]{9}$/.test(id)) {
+    alert("Enter a valid Student ID");
+    return;
+  }
+} else {
+  if (form.facultyId.trim() === "") {
+    alert("Enter Faculty ID");
+    return;
+  }
+}
 
     try {
       await registerUser(form);
@@ -46,14 +61,25 @@ function Register() {
 
       <form onSubmit={handleSubmit}>
 
-        <input
-          type="text"
-          name="studentId"
-          placeholder="Student ID"
-          value={form.studentId}
-          onChange={handleChange}
-          required
-        />
+      {form.role === "student" ? (
+  <input
+    type="text"
+    name="studentId"
+    placeholder="Student ID"
+    value={form.studentId}
+    onChange={handleChange}
+    required
+  />
+) : (
+  <input
+    type="text"
+    name="facultyId"
+    placeholder="Faculty ID"
+    value={form.facultyId}
+    onChange={handleChange}
+    required
+  />
+)}
 
         <input
           type="text"
@@ -81,6 +107,15 @@ function Register() {
           onChange={handleChange}
           required
         />
+      <select
+        name="role"
+        value={form.role}
+        onChange={handleChange}
+        required
+      >
+        <option value="student">Student</option>
+        <option value="faculty">Faculty</option>
+      </select>
 
         <input
           type="text"
@@ -91,14 +126,16 @@ function Register() {
           required
         />
 
-        <input
-          type="text"
-          name="year"
-          placeholder="Year"
-          value={form.year}
-          onChange={handleChange}
-          required
-        />
+    {form.role === "student" && (
+  <input
+    type="text"
+    name="year"
+    placeholder="Year"
+    value={form.year}
+    onChange={handleChange}
+    required
+  />
+)}
 
         <button type="submit">
           Register

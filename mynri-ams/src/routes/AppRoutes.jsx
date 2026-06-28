@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Register from "../pages/Register";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
-import Scan from "../pages/Scan";
+import Scan from "../pages/ScanQR";
 import Fingerprint from "../pages/Fingerprint";
 import History from "../pages/History";
 import Profile from "../pages/Profile";
@@ -26,6 +26,10 @@ function AppRoutes() {
       <Route path="/history" element={<History />} />
 
       <Route path="/profile" element={<Profile />} />
+      <Route
+  path="/faculty-dashboard"
+  element={<h1>Faculty Dashboard (Coming Soon)</h1>}
+/>
 
     </Routes>
   );
